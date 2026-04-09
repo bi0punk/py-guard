@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Inicio | Log Analyzer MVP{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>MVP para analizar logs de apps Flask y Django</h1>
+    <p>
+      Sube uno o varios archivos de log y obtén un resumen operativo: IPs más activas,
+      rutas más visitadas, errores más repetidos, estados HTTP y actividad por hora.
+    </p>
+  </div>
+</section>
+
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+<section class="card">
+  <h2>Subir logs</h2>
+  <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" class="upload-form">
+    <input type="file" name="log_files" multiple accept=".log,.txt" required />
+    <button type="submit">Analizar logs</button>
+  </form>
+  <div class="hint">
+    <strong>Formatos soportados en este MVP:</strong>
+    <ul>
+      <li>Common/combined logs tipo Nginx o Gunicorn access logs</li>
+      <li>Logs de desarrollo de Django</li>
+      <li>Líneas de error con ERROR, CRITICAL, Exception o Traceback</li>
+    </ul>
+  </div>
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Qué entrega</h2>
+    <ul>
+      <li>Top IPs consumidoras</li>
+      <li>Top rutas normalizadas</li>
+      <li>Top errores normalizados</li>
+      <li>Matriz por IP y código HTTP</li>
+      <li>Matriz por ruta y código HTTP</li>
+      <li>Actividad por hora</li>
+      <li>Eventos recientes parseados</li>
+    </ul>
+  </article>
+
+  <article class="card">
+    <h2>Reportes recientes</h2>
+    {% if recent_reports %}
+      <ul>
+        {% for report in recent_reports %}
+          <li><a href="{{ url_for('report', analysis_id=report.analysis_id) }}">{{ report.analysis_id }}</a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No hay análisis previos guardados todavía.</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,363 @@
+{
+  "analysis_id": "4036427a-c665-4987-88c7-27d3b06fe213",
+  "files": [
+    "3a5d033e-18fe-4446-90a3-55d6bc0367f7_sample_flask_django.log"
+  ],
+  "summary": {
+    "total_lines": 19,
+    "access_events": 12,
+    "error_events": 4,
+    "unparsed_lines": 0,
+    "error_rate_pct": 21.05
+  },
+  "top_ips": [
+    {
+      "ip": "192.168.1.10",
+      "count": 4
+    },
+    {
+      "ip": "192.168.1.12",
+      "count": 2
+    },
+    {
+      "ip": "192.168.1.15",
+      "count": 2
+    },
+    {
+      "ip": "192.168.1.11",
+      "count": 1
+    },
+    {
+      "ip": "192.168.1.13",
+      "count": 1
+    }
+  ],
+  "top_paths": [
+    {
+      "path": "/dashboard",
+      "count": 3
+    },
+    {
+      "path": "/api/orders/<num>",
+      "count": 3
+    },
+    {
+      "path": "/admin/users/<num>/profile",
+      "count": 2
+    },
+    {
+      "path": "/login",
+      "count": 1
+    },
+    {
+      "path": "/api/auth",
+      "count": 1
+    },
+    {
+      "path": "/health",
+      "count": 1
+    },
+    {
+      "path": "/favicon.ico",
+      "count": 1
+    }
+  ],
+  "top_methods": [
+    {
+      "method": "GET",
+      "count": 11
+    },
+    {
+      "method": "POST",
+      "count": 1
+    }
+  ],
+  "top_statuses": [
+    {
+      "status": "200",
+      "count": 8
+    },
+    {
+      "status": "500",
+      "count": 2
+    },
+    {
+      "status": "404",
+      "count": 2
+    }
+  ],
+  "top_errors": [
+    {
+      "message": "<num>-<num>-<num> <num>:<num>:<num>,<num> ERROR django.request Internal Server Error: /api/orders/<num>",
+      "count": 1
+    },
+    {
+      "message": "<num>-<num>-<num> <num>:<num>:<num>,<num> ERROR app.auth Login failed for user id=<num> from <ip>",
+      "count": 1
+    },
+    {
+      "message": "ValueError: invalid payload",
+      "count": 1
+    },
+    {
+      "message": "<num>-<num>-<num> <num>:<num>:<num>,<num> CRITICAL app.db Database timeout for tenant=acme request=<num>",
+      "count": 1
+    }
+  ],
+  "paths_with_errors": [
+    {
+      "path": "/api/orders/125",
+      "count": 1
+    }
+  ],
+  "hourly_activity": [
+    {
+      "hour": "2026-04-09 10:00",
+      "access": 12,
+      "error": 3
+    },
+    {
+      "hour": "unknown",
+      "access": 0,
+      "error": 1
+    }
+  ],
+  "ip_status_matrix": [
+    {
+      "ip": "192.168.1.10",
+      "total": 4,
+      "2xx": 3,
+      "3xx": 0,
+      "4xx": 0,
+      "5xx": 1
+    },
+    {
+      "ip": "192.168.1.12",
+      "total": 2,
+      "2xx": 1,
+      "3xx": 0,
+      "4xx": 1,
+      "5xx": 0
+    },
+    {
+      "ip": "192.168.1.15",
+      "total": 2,
+      "2xx": 2,
+      "3xx": 0,
+      "4xx": 0,
+      "5xx": 0
+    },
+    {
+      "ip": "192.168.1.11",
+      "total": 1,
+      "2xx": 1,
+      "3xx": 0,
+      "4xx": 0,
+      "5xx": 0
+    },
+    {
+      "ip": "192.168.1.13",
+      "total": 1,
+      "2xx": 0,
+      "3xx": 0,
+      "4xx": 1,
+      "5xx": 0
+    }
+  ],
+  "route_status_matrix": [
+    {
+      "path": "/dashboard",
+      "total": 3,
+      "2xx": 3,
+      "3xx": 0,
+      "4xx": 0,
+      "5xx": 0
+    },
+    {
+      "path": "/api/orders/<num>",
+      "total": 3,
+      "2xx": 1,
+      "3xx": 0,
+      "4xx": 1,
+      "5xx": 1
+    },
+    {
+      "path": "/admin/users/<num>/profile",
+      "total": 2,
+      "2xx": 2,
+      "3xx": 0,
+      "4xx": 0,
+      "5xx": 0
+    },
+    {
+      "path": "/login",
+      "total": 1,
+      "2xx": 1,
+      "3xx": 0,
+      "4xx": 0,
+      "5xx": 0
+    },
+    {
+      "path": "/api/auth",
+      "total": 1,
+      "2xx": 0,
+      "3xx": 0,
+      "4xx": 0,
+      "5xx": 1
+    },
+    {
+      "path": "/health",
+      "total": 1,
+      "2xx": 1,
+      "3xx": 0,
+      "4xx": 0,
+      "5xx": 0
+    },
+    {
+      "path": "/favicon.ico",
+      "total": 1,
+      "2xx": 0,
+      "3xx": 0,
+      "4xx": 1,
+      "5xx": 0
+    }
+  ],
+  "recent_events": [
+    {
+      "kind": "access",
+      "ip": "192.168.1.10",
+      "method": "GET",
+      "path": "/login",
+      "normalized_path": "/login",
+      "status": 200,
+      "timestamp": "2026-04-09T10:15:03+00:00"
+    },
+    {
+      "kind": "access",
+      "ip": "192.168.1.10",
+      "method": "POST",
+      "path": "/api/auth",
+      "normalized_path": "/api/auth",
+      "status": 500,
+      "timestamp": "2026-04-09T10:15:04+00:00"
+    },
+    {
+      "kind": "access",
+      "ip": "192.168.1.11",
+      "method": "GET",
+      "path": "/dashboard",
+      "normalized_path": "/dashboard",
+      "status": 200,
+      "timestamp": "2026-04-09T10:15:05+00:00"
+    },
+    {
+      "kind": "access",
+      "ip": "192.168.1.12",
+      "method": "GET",
+      "path": "/api/orders/123",
+      "normalized_path": "/api/orders/<num>",
+      "status": 200,
+      "timestamp": "2026-04-09T10:15:06+00:00"
+    },
+    {
+      "kind": "access",
+      "ip": "192.168.1.12",
+      "method": "GET",
+      "path": "/api/orders/124",
+      "normalized_path": "/api/orders/<num>",
+      "status": 404,
+      "timestamp": "2026-04-09T10:15:07+00:00"
+    },
+    {
+      "kind": "access",
+      "ip": "192.168.1.15",
+      "method": "GET",
+      "path": "/admin/users/899/profile",
+      "normalized_path": "/admin/users/<num>/profile",
+      "status": 200,
+      "timestamp": "2026-04-09T10:16:01+00:00"
+    },
+    {
+      "kind": "access",
+      "ip": "192.168.1.15",
+      "method": "GET",
+      "path": "/admin/users/900/profile",
+      "normalized_path": "/admin/users/<num>/profile",
+      "status": 200,
+      "timestamp": "2026-04-09T10:16:07+00:00"
+    },
+    {
+      "kind": "access",
+      "ip": "N/A",
+      "method": "GET",
+      "path": "/health",
+      "normalized_path": "/health",
+      "status": 200,
+      "timestamp": "2026-04-09T10:16:11"
+    },
+    {
+      "kind": "access",
+      "ip": "N/A",
+      "method": "GET",
+      "path": "/api/orders/125",
+      "normalized_path": "/api/orders/<num>",
+      "status": 500,
+      "timestamp": "2026-04-09T10:16:12"
+    },
+    {
+      "kind": "error",
+      "message": "2026-04-09 10:16:13,101 ERROR django.request Internal Server Error: /api/orders/125",
+      "normalized_message": "<num>-<num>-<num> <num>:<num>:<num>,<num> ERROR django.request Internal Server Error: /api/orders/<num>",
+      "timestamp": "2026-04-09T10:16:13.101000",
+      "path_hint": "/api/orders/125"
+    },
+    {
+      "kind": "error",
+      "message": "2026-04-09 10:16:13,103 ERROR app.auth Login failed for user id=44 from 192.168.1.10",
+      "normalized_message": "<num>-<num>-<num> <num>:<num>:<num>,<num> ERROR app.auth Login failed for user id=<num> from <ip>",
+      "timestamp": "2026-04-09T10:16:13.103000",
+      "path_hint": null
+    },
+    {
+      "kind": "error",
+      "message": "Traceback (most recent call last): |   File \"/app/views.py\", line 40, in post |     raise ValueError(\"invalid payload\") | ValueError: invalid payload",
+      "normalized_message": "ValueError: invalid payload",
+      "timestamp": null,
+      "path_hint": null
+    },
+    {
+      "kind": "error",
+      "message": "2026-04-09 10:17:00,001 CRITICAL app.db Database timeout for tenant=acme request=1299",
+      "normalized_message": "<num>-<num>-<num> <num>:<num>:<num>,<num> CRITICAL app.db Database timeout for tenant=acme request=<num>",
+      "timestamp": "2026-04-09T10:17:00.001000",
+      "path_hint": null
+    },
+    {
+      "kind": "access",
+      "ip": "192.168.1.10",
+      "method": "GET",
+      "path": "/dashboard",
+      "normalized_path": "/dashboard",
+      "status": 200,
+      "timestamp": "2026-04-09T10:18:03+00:00"
+    },
+    {
+      "kind": "access",
+      "ip": "192.168.1.10",
+      "method": "GET",
+      "path": "/dashboard",
+      "normalized_path": "/dashboard",
+      "status": 200,
+      "timestamp": "2026-04-09T10:18:04+00:00"
+    },
+    {
+      "kind": "access",
+      "ip": "192.168.1.13",
+      "method": "GET",
+      "path": "/favicon.ico",
+      "normalized_path": "/favicon.ico",
+      "status": 404,
+      "timestamp": "2026-04-09T10:18:04+00:00"
+    }
+  ]
+}

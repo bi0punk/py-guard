@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% block title %}Reporte {{ data.analysis_id }}{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <h1>Reporte de análisis</h1>
+    <p><strong>ID:</strong> {{ data.analysis_id }}</p>
+    <p><strong>Archivos:</strong> {{ data.files | join(', ') }}</p>
+    <p><a href="{{ url_for('api_report', analysis_id=data.analysis_id) }}" target="_blank">Ver JSON del análisis</a></p>
+  </div>
+</section>
+
+<section class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-label">Líneas totales</span>
+    <strong>{{ data.summary.total_lines }}</strong>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Eventos de acceso</span>
+    <strong>{{ data.summary.access_events }}</strong>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Eventos de error</span>
+    <strong>{{ data.summary.error_events }}</strong>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">No parseadas</span>
+    <strong>{{ data.summary.unparsed_lines }}</strong>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Tasa de error</span>
+    <strong>{{ data.summary.error_rate_pct }}%</strong>
+  </div>
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Top IPs</h2>
+    <table>
+      <thead><tr><th>IP</th><th>Cantidad</th></tr></thead>
+      <tbody>
+        {% for row in data.top_ips %}
+        <tr><td>{{ row.ip }}</td><td>{{ row.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+
+  <article class="card">
+    <h2>Top rutas</h2>
+    <table>
+      <thead><tr><th>Ruta</th><th>Cantidad</th></tr></thead>
+      <tbody>
+        {% for row in data.top_paths %}
+        <tr><td>{{ row.path }}</td><td>{{ row.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Top errores</h2>
+    <table>
+      <thead><tr><th>Error normalizado</th><th>Veces</th></tr></thead>
+      <tbody>
+        {% for row in data.top_errors %}
+        <tr><td class="wrap">{{ row.message }}</td><td>{{ row.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+
+  <article class="card">
+    <h2>Estados HTTP</h2>
+    <table>
+      <thead><tr><th>Status</th><th>Cantidad</th></tr></thead>
+      <tbody>
+        {% for row in data.top_statuses %}
+        <tr><td>{{ row.status }}</td><td>{{ row.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2 class="mt-24">Métodos HTTP</h2>
+    <table>
+      <thead><tr><th>Método</th><th>Cantidad</th></tr></thead>
+      <tbody>
+        {% for row in data.top_methods %}
+        <tr><td>{{ row.method }}</td><td>{{ row.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<section class="card">
+  <h2>Actividad por hora</h2>
+  <table>
+    <thead><tr><th>Hora</th><th>Accesos</th><th>Errores</th></tr></thead>
+    <tbody>
+      {% for row in data.hourly_activity %}
+      <tr><td>{{ row.hour }}</td><td>{{ row.access }}</td><td>{{ row.error }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>IPs vs códigos</h2>
+    <table>
+      <thead><tr><th>IP</th><th>Total</th><th>2xx</th><th>3xx</th><th>4xx</th><th>5xx</th></tr></thead>
+      <tbody>
+        {% for row in data.ip_status_matrix %}
+        <tr>
+          <td>{{ row.ip }}</td>
+          <td>{{ row.total }}</td>
+          <td>{{ row['2xx'] }}</td>
+          <td>{{ row['3xx'] }}</td>
+          <td>{{ row['4xx'] }}</td>
+          <td>{{ row['5xx'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+
+  <article class="card">
+    <h2>Rutas vs códigos</h2>
+    <table>
+      <thead><tr><th>Ruta</th><th>Total</th><th>2xx</th><th>3xx</th><th>4xx</th><th>5xx</th></tr></thead>
+      <tbody>
+        {% for row in data.route_status_matrix %}
+        <tr>
+          <td class="wrap">{{ row.path }}</td>
+          <td>{{ row.total }}</td>
+          <td>{{ row['2xx'] }}</td>
+          <td>{{ row['3xx'] }}</td>
+          <td>{{ row['4xx'] }}</td>
+          <td>{{ row['5xx'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<section class="card">
+  <h2>Eventos recientes</h2>
+  <table>
+    <thead><tr><th>Tipo</th><th>Detalle</th><th>Timestamp</th></tr></thead>
+    <tbody>
+      {% for row in data.recent_events %}
+      <tr>
+        <td>{{ row.kind }}</td>
+        <td class="wrap">
+          {% if row.kind == 'access' %}
+            {{ row.ip }} - {{ row.method }} {{ row.path }} - {{ row.status }}
+          {% else %}
+            {{ row.message }}
+          {% endif %}
+        </td>
+        <td>{{ row.timestamp or '-' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
