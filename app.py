@@ -20,7 +20,7 @@ DATA_DIR.mkdir(exist_ok=True)
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-change-this')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.urandom(24).hex()
 
 
 def allowed_file(filename: str) -> bool:
@@ -90,5 +90,5 @@ def health():
 if __name__ == '__main__':
     host = os.getenv('HOST', '0.0.0.0')
     port = int(os.getenv('PORT', '8000'))
-    debug = os.getenv('DEBUG', 'true').lower() == 'true'
+    debug = os.getenv('DEBUG', 'false').lower() == 'true'
     app.run(host=host, port=port, debug=debug)
