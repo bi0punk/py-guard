@@ -44,21 +44,25 @@ No intenta reemplazar a ELK, Loki o Datadog. Es una base rápida para un visor i
 ## 3. Estructura
 
 ```text
-log_analyzer_mvp/
+py-guard/
 ├── app.py
 ├── parser.py
 ├── requirements.txt
 ├── Dockerfile
-├── sample_flask_django.log
-├── uploads/
-├── data/
+├── LICENSE
 ├── static/
 │   └── styles.css
-└── templates/
-    ├── base.html
-    ├── index.html
-    ├── report.html
-    └── 404.html
+├── templates/
+│   ├── base.html
+│   ├── index.html
+│   ├── report.html
+│   └── 404.html
+├── tests/
+│   ├── conftest.py
+│   ├── test_app.py
+│   └── test_parser.py
+├── uploads/   # generada en tiempo de ejecución (gitignoreada)
+└── data/      # reportes JSON generados (gitignoreada)
 ```
 
 ## 4. Ejecución local en Linux
