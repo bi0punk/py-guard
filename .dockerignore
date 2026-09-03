@@ -1,0 +1,17 @@
+# .dockerignore for py-guard
+#
+# Exclude development and tooling artifacts
+.git/
+.env
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+*.log
+data/
+uploads/
+tests/
+*.pyc
+__pycache__/
+
