@@ -3,9 +3,14 @@ import os
 import re
 import uuid
 from collections import Counter, defaultdict, deque
-from dataclasses import dataclass, asdict
+from collections.abc import Callable, Iterable
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any
+
+BEST_EFFORT_TIMESTAMP_PATTERN = re.compile(
+    r'\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?(?:[+-]\d{2}:?\d{2})?'
+)
 
 
 ACCESS_PATTERNS = [
@@ -60,7 +65,7 @@ class AccessEvent:
     path: str
     normalized_path: str
     status: int
-    timestamp: Optional[str] = None
+    timestamp: str | None = None
 
 
 @dataclass
@@ -68,30 +73,30 @@ class ErrorEvent:
     kind: str
     message: str
     normalized_message: str
-    timestamp: Optional[str] = None
-    path_hint: Optional[str] = None
+    timestamp: str | None = None
+    path_hint: str | None = None
 
 
 class LogAnalyzer:
     def __init__(self) -> None:
-        self.access_events: List[AccessEvent] = []
-        self.error_events: List[ErrorEvent] = []
+        self.access_events: list[AccessEvent] = []
+        self.error_events: list[ErrorEvent] = []
         self.total_lines: int = 0
         self.unparsed_lines: int = 0
         self.recent_events: deque = deque(maxlen=120)
-        self.raw_files: List[str] = []
+        self.raw_files: list[str] = []
 
-    def parse_files(self, filepaths: Iterable[str]) -> Dict[str, Any]:
+    def parse_files(self, filepaths: Iterable[str]) -> dict[str, Any]:
         for filepath in filepaths:
             self.raw_files.append(os.path.basename(filepath))
             self._parse_file(filepath)
         return self.build_summary()
 
     def _parse_file(self, filepath: str) -> None:
-        traceback_buffer: List[str] = []
+        traceback_buffer: list[str] = []
         collecting_traceback = False
 
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as fh:
+        with open(filepath, encoding='utf-8', errors='replace') as fh:
             for raw_line in fh:
                 self.total_lines += 1
                 line = raw_line.rstrip('\n')
@@ -126,7 +131,7 @@ class LogAnalyzer:
         if collecting_traceback and traceback_buffer:
             self._flush_traceback(traceback_buffer)
 
-    def _flush_traceback(self, traceback_buffer: List[str]) -> None:
+    def _flush_traceback(self, traceback_buffer: list[str]) -> None:
         if not traceback_buffer:
             return
         lines = [ln for ln in traceback_buffer if ln.strip()]
@@ -151,11 +156,9 @@ class LogAnalyzer:
             return True
         if LOG_LEVEL_RE.search(line):
             return True
-        if TRACEBACK_START_RE.search(line):
-            return True
-        return False
+        return bool(TRACEBACK_START_RE.search(line))
 
-    def _parse_access_line(self, line: str) -> Optional[AccessEvent]:
+    def _parse_access_line(self, line: str) -> AccessEvent | None:
         for pattern in ACCESS_PATTERNS:
             match = pattern.search(line)
             if match:
@@ -175,7 +178,7 @@ class LogAnalyzer:
                 )
         return None
 
-    def _parse_error_line(self, line: str) -> Optional[ErrorEvent]:
+    def _parse_error_line(self, line: str) -> ErrorEvent | None:
         if not line.strip():
             return None
 
@@ -196,8 +199,8 @@ class LogAnalyzer:
             )
         return None
 
-    def _extract_best_effort_timestamp(self, line: str) -> Optional[str]:
-        candidates = re.findall(r'\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?(?:[+-]\d{2}:?\d{2})?', line)
+    def _extract_best_effort_timestamp(self, line: str) -> str | None:
+        candidates = BEST_EFFORT_TIMESTAMP_PATTERN.findall(line)
         for candidate in candidates:
             ts = self.parse_timestamp(candidate)
             if ts:
@@ -211,7 +214,7 @@ class LogAnalyzer:
         return None
 
     @staticmethod
-    def parse_timestamp(raw_ts: Optional[str]) -> Optional[str]:
+    def parse_timestamp(raw_ts: str | None) -> str | None:
         if not raw_ts:
             return None
         text = raw_ts.strip()
@@ -244,7 +247,7 @@ class LogAnalyzer:
         msg = re.sub(r'"[^"]+"', '"<text>"', msg)
         return msg[:250]
 
-    def build_summary(self) -> Dict[str, Any]:
+    def build_summary(self) -> dict[str, Any]:
         top_ips = Counter(event.ip for event in self.access_events if event.ip != 'N/A').most_common(15)
         top_paths = Counter(event.normalized_path for event in self.access_events).most_common(15)
         top_methods = Counter(event.method for event in self.access_events).most_common(10)
@@ -281,8 +284,8 @@ class LogAnalyzer:
             'recent_events': list(self.recent_events)[-50:],
         }
 
-    def _build_hourly_activity(self) -> List[Dict[str, Any]]:
-        buckets: Dict[str, Dict[str, int]] = defaultdict(lambda: {'access': 0, 'error': 0})
+    def _build_hourly_activity(self) -> list[dict[str, Any]]:
+        buckets: dict[str, dict[str, int]] = defaultdict(lambda: {'access': 0, 'error': 0})
 
         for event in self.access_events:
             hour = self._hour_bucket(event.timestamp)
@@ -298,7 +301,7 @@ class LogAnalyzer:
         ]
 
     @staticmethod
-    def _hour_bucket(timestamp: Optional[str]) -> str:
+    def _hour_bucket(timestamp: str | None) -> str:
         if not timestamp:
             return 'unknown'
         try:
@@ -307,17 +310,22 @@ class LogAnalyzer:
         except ValueError:
             return 'unknown'
 
-    def _build_ip_status_matrix(self) -> List[Dict[str, Any]]:
-        counter: Dict[str, Counter] = defaultdict(Counter)
+    def _build_status_matrix(
+        self, key_func: Callable[[Any], str | None], filter_none: bool = False
+    ) -> list[dict[str, Any]]:
+        counter: dict[str, Counter] = defaultdict(Counter)
         for event in self.access_events:
-            if event.ip != 'N/A':
-                counter[event.ip][str(event.status)] += 1
+            key = key_func(event)
+            if key is None and filter_none:
+                continue
+            if key is not None:
+                counter[key][str(event.status)] += 1
 
         rows = []
-        for ip, status_counter in counter.items():
+        for key, status_counter in counter.items():
             total = sum(status_counter.values())
             rows.append({
-                'ip': ip,
+                'key': key,
                 'total': total,
                 '2xx': sum(v for k, v in status_counter.items() if k.startswith('2')),
                 '3xx': sum(v for k, v in status_counter.items() if k.startswith('3')),
@@ -327,27 +335,16 @@ class LogAnalyzer:
         rows.sort(key=lambda item: item['total'], reverse=True)
         return rows[:20]
 
-    def _build_route_status_matrix(self) -> List[Dict[str, Any]]:
-        counter: Dict[str, Counter] = defaultdict(Counter)
-        for event in self.access_events:
-            counter[event.normalized_path][str(event.status)] += 1
+    def _build_ip_status_matrix(self) -> list[dict[str, Any]]:
+        return self._build_status_matrix(
+            key_func=lambda e: e.ip if e.ip != 'N/A' else None, filter_none=True
+        )
 
-        rows = []
-        for path, status_counter in counter.items():
-            total = sum(status_counter.values())
-            rows.append({
-                'path': path,
-                'total': total,
-                '2xx': sum(v for k, v in status_counter.items() if k.startswith('2')),
-                '3xx': sum(v for k, v in status_counter.items() if k.startswith('3')),
-                '4xx': sum(v for k, v in status_counter.items() if k.startswith('4')),
-                '5xx': sum(v for k, v in status_counter.items() if k.startswith('5')),
-            })
-        rows.sort(key=lambda item: item['total'], reverse=True)
-        return rows[:20]
+    def _build_route_status_matrix(self) -> list[dict[str, Any]]:
+        return self._build_status_matrix(key_func=lambda e: e.normalized_path)
 
 
-def save_summary(base_dir: str, summary: Dict[str, Any]) -> str:
+def save_summary(base_dir: str, summary: dict[str, Any]) -> str:
     os.makedirs(base_dir, exist_ok=True)
     analysis_id = summary['analysis_id']
     out_path = os.path.join(base_dir, f'{analysis_id}.json')
@@ -356,13 +353,13 @@ def save_summary(base_dir: str, summary: Dict[str, Any]) -> str:
     return out_path
 
 
-def load_summary(base_dir: str, analysis_id: str) -> Optional[Dict[str, Any]]:
+def load_summary(base_dir: str, analysis_id: str) -> dict[str, Any] | None:
     if not _is_valid_analysis_id(analysis_id):
         return None
     target = os.path.join(base_dir, f'{analysis_id}.json')
     if not os.path.exists(target):
         return None
-    with open(target, 'r', encoding='utf-8') as fh:
+    with open(target, encoding='utf-8') as fh:
         return json.load(fh)
 
 

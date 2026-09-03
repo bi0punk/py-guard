@@ -1,9 +1,9 @@
-import json
 import os
+import uuid
+
+import pytest
+
 from parser import (
-    AccessEvent,
-    ErrorEvent,
-    LogAnalyzer,
     load_summary,
     save_summary,
 )
@@ -237,10 +237,10 @@ class TestHourlyActivity:
 
 class TestSaveLoadSummary:
     def test_save_and_load_roundtrip(self, tmp_path):
-        data = {"analysis_id": "test-123", "summary": {"total_lines": 10}}
+        data = {"analysis_id": str(uuid.uuid4()), "summary": {"total_lines": 10}}
         path = save_summary(str(tmp_path), data)
         assert os.path.exists(path)
-        loaded = load_summary(str(tmp_path), "test-123")
+        loaded = load_summary(str(tmp_path), data["analysis_id"])
         assert loaded == data
 
     def test_load_nonexistent(self, tmp_path):
@@ -252,7 +252,7 @@ class TestIPStatusMatrix:
         result = analyzer.parse_files([sample_log_file])
         matrix = result["ip_status_matrix"]
         assert len(matrix) > 0
-        ip_10 = next(item for item in matrix if item["ip"] == "192.168.1.10")
+        ip_10 = next(item for item in matrix if item["key"] == "192.168.1.10")
         assert ip_10["total"] == 4
         assert ip_10["2xx"] == 3
         assert ip_10["5xx"] == 1
@@ -262,7 +262,6 @@ class TestRouteStatusMatrix:
     def test_route_matrix(self, sample_log_file, analyzer):
         result = analyzer.parse_files([sample_log_file])
         matrix = result["route_status_matrix"]
-        dashboard = next(item for item in matrix if item["path"] == "/dashboard")
+        dashboard = next(item for item in matrix if item["key"] == "/dashboard")
         assert dashboard["total"] == 3
         assert dashboard["2xx"] == 3
-import pytest

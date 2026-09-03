@@ -9,17 +9,30 @@ from werkzeug.utils import secure_filename
 from parser import LogAnalyzer, load_summary, save_summary
 
 BASE_DIR = Path(__file__).resolve().parent
-UPLOAD_DIR = BASE_DIR / 'uploads'
-DATA_DIR = BASE_DIR / 'data'
+DEFAULT_UPLOAD_DIR = BASE_DIR / 'uploads'
+DEFAULT_DATA_DIR = BASE_DIR / 'data'
 ALLOWED_EXTENSIONS = {'.log', '.txt'}
 MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100 MB
-
-UPLOAD_DIR.mkdir(exist_ok=True)
-DATA_DIR.mkdir(exist_ok=True)
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.urandom(24).hex()
+
+
+def upload_dir() -> Path:
+    path = Path(app.config.get('UPLOAD_DIR', DEFAULT_UPLOAD_DIR))
+    path.mkdir(exist_ok=True)
+    return path
+
+
+def data_dir() -> Path:
+    path = Path(app.config.get('DATA_DIR', DEFAULT_DATA_DIR))
+    path.mkdir(exist_ok=True)
+    return path
+
+
+DEFAULT_UPLOAD_DIR.mkdir(exist_ok=True)
+DEFAULT_DATA_DIR.mkdir(exist_ok=True)
 
 
 def allowed_file(filename: str) -> bool:
@@ -29,7 +42,7 @@ def allowed_file(filename: str) -> bool:
 @app.route('/')
 def index():
     recent_reports = []
-    for path in sorted(DATA_DIR.glob('*.json'), key=lambda p: p.stat().st_mtime, reverse=True)[:10]:
+    for path in sorted(data_dir().glob('*.json'), key=lambda p: p.stat().st_mtime, reverse=True)[:10]:
         recent_reports.append({'analysis_id': path.stem, 'filename': path.name})
     return render_template('index.html', recent_reports=recent_reports)
 
@@ -54,14 +67,14 @@ def analyze():
 
         safe_name = secure_filename(file.filename)
         unique_name = f'{uuid.uuid4()}_{safe_name}'
-        destination = UPLOAD_DIR / unique_name
+        destination = upload_dir() / unique_name
         file.save(destination)
         saved_paths.append(str(destination))
 
     try:
         analyzer = LogAnalyzer()
         result = analyzer.parse_files(saved_paths)
-        save_summary(str(DATA_DIR), result)
+        save_summary(str(data_dir()), result)
     finally:
         for path in saved_paths:
             with suppress(OSError):
@@ -72,7 +85,7 @@ def analyze():
 
 @app.route('/report/<analysis_id>')
 def report(analysis_id: str):
-    data = load_summary(str(DATA_DIR), analysis_id)
+    data = load_summary(str(data_dir()), analysis_id)
     if not data:
         return render_template('404.html'), 404
     return render_template('report.html', data=data)
@@ -80,7 +93,7 @@ def report(analysis_id: str):
 
 @app.route('/api/report/<analysis_id>')
 def api_report(analysis_id: str):
-    data = load_summary(str(DATA_DIR), analysis_id)
+    data = load_summary(str(data_dir()), analysis_id)
     if not data:
         return jsonify({'error': 'analysis not found'}), 404
     return jsonify(data)

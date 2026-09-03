@@ -1,15 +1,19 @@
-import json
-import os
 import pytest
+
 from app import app
 
 
 @pytest.fixture
-def client():
+def client(tmp_path):
     app.config["TESTING"] = True
-    app.config["UPLOAD_FOLDER"] = "/tmp/test-uploads"
+    upload_dir = tmp_path / "uploads"
+    data_dir = tmp_path / "data"
+    app.config['UPLOAD_DIR'] = str(upload_dir)
+    app.config['DATA_DIR'] = str(data_dir)
     with app.test_client() as client:
         yield client
+    app.config.pop('UPLOAD_DIR', None)
+    app.config.pop('DATA_DIR', None)
 
 
 class TestRoutes:
