@@ -357,8 +357,18 @@ def save_summary(base_dir: str, summary: Dict[str, Any]) -> str:
 
 
 def load_summary(base_dir: str, analysis_id: str) -> Optional[Dict[str, Any]]:
+    if not _is_valid_analysis_id(analysis_id):
+        return None
     target = os.path.join(base_dir, f'{analysis_id}.json')
     if not os.path.exists(target):
         return None
     with open(target, 'r', encoding='utf-8') as fh:
         return json.load(fh)
+
+
+def _is_valid_analysis_id(analysis_id: str) -> bool:
+    try:
+        uuid.UUID(analysis_id)
+    except (ValueError, AttributeError, TypeError):
+        return False
+    return True
