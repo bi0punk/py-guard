@@ -1,13 +1,12 @@
 import os
 import uuid
+from contextlib import suppress
 from pathlib import Path
-from typing import List
 
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 from werkzeug.utils import secure_filename
 
 from parser import LogAnalyzer, load_summary, save_summary
-
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / 'uploads'
@@ -38,7 +37,7 @@ def index():
 @app.route('/analyze', methods=['POST'])
 def analyze():
     files = request.files.getlist('log_files')
-    saved_paths: List[str] = []
+    saved_paths: list[str] = []
 
     if not files or all(not f.filename for f in files):
         return render_template('index.html', error='Debes subir al menos un archivo .log o .txt', recent_reports=[]), 400
@@ -59,9 +58,14 @@ def analyze():
         file.save(destination)
         saved_paths.append(str(destination))
 
-    analyzer = LogAnalyzer()
-    result = analyzer.parse_files(saved_paths)
-    save_summary(str(DATA_DIR), result)
+    try:
+        analyzer = LogAnalyzer()
+        result = analyzer.parse_files(saved_paths)
+        save_summary(str(DATA_DIR), result)
+    finally:
+        for path in saved_paths:
+            with suppress(OSError):
+                os.remove(path)
 
     return redirect(url_for('report', analysis_id=result['analysis_id']))
 
