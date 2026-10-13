@@ -287,12 +287,12 @@ class LogAnalyzer:
     def _build_hourly_activity(self) -> list[dict[str, Any]]:
         buckets: dict[str, dict[str, int]] = defaultdict(lambda: {'access': 0, 'error': 0})
 
-        for event in self.access_events:
-            hour = self._hour_bucket(event.timestamp)
+        for access_event in self.access_events:
+            hour = self._hour_bucket(access_event.timestamp)
             buckets[hour]['access'] += 1
 
-        for event in self.error_events:
-            hour = self._hour_bucket(event.timestamp)
+        for error_event in self.error_events:
+            hour = self._hour_bucket(error_event.timestamp)
             buckets[hour]['error'] += 1
 
         return [
@@ -321,7 +321,7 @@ class LogAnalyzer:
             if key is not None:
                 counter[key][str(event.status)] += 1
 
-        rows = []
+        rows: list[dict[str, Any]] = []
         for key, status_counter in counter.items():
             total = sum(status_counter.values())
             rows.append({
